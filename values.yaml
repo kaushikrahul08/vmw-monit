@@ -1,0 +1,67 @@
+global:
+  replicaCount: 2
+  autoscaleEnabled: false
+  autoscaleMin: 2
+  autoscaleMax: 3
+  cpu:
+    targetAverageUtilization: 150
+  memory:
+    targetAverageUtilization: 175
+  image:
+    repository: kaushikrahul08
+    pullPolicy: IfNotPresent
+    
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  namespace: "vmw-monit"
+  project: edj
+  
+  serviceAccount:
+    create: true
+    annotations: {}
+
+  ingress:
+    # Generate ingress manifests
+    enabled: true
+    # Only generates ingress manifests
+    only: false
+    gatewayName: edj-gateway
+    #certName: edj-ingress-certs
+
+    tls: []
+
+  resources: 
+    limits:
+     cpu: 500m
+     memory: 1000Mi
+    requests:
+     cpu: 250m
+     memory: 500Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  deploymentOptions:
+    # Supports future, such as canary and other deployment strategies
+    # Currently supported:
+    # - Standard => Default / nothing special
+    # - Blue/Green => Deploy either a blue or green version
+    strategies:
+    - standard
+    - bluegreen
+
+    channels:
+      - blue
+      - green
+  
+  # External services Urls for istio egress serviceentry creation
+  egressSvcEntry:
+    enabled: true
+    # appdUrl: 
+    #   - safeway-loyalty.saas.appdynamics.com
+    #   - safeway-loyaltytest.saas.appdynamics.com
+    # msftLoginUrl: login.microsoftonline.com

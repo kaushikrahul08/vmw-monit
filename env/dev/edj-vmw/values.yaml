@@ -1,0 +1,35 @@
+app:
+  akvName: edj-auth-dev-kv-01
+  configFile: "env/dev/edj-vmw/configmap.yaml"
+  containers:
+    name: vmw-monit
+    image: vmware_exporter
+    tag: v1
+    envCode: dev
+    port: 9272
+    readinessEndpoint: /edj-vmw
+    livenessEndpoint: /edj-vmw
+
+  labels:
+    app: edj-vmw
+    project: edj
+    env: dev
+  
+
+deploymentOptions:
+  activeStrategy: standard
+  activeChannel: blue
+
+
+service:
+  type: ClusterIP
+  port: 9272
+  targetPort: 9272
+  portName: http-edj
+  annotations: {}
+  labels:
+    app: edj-vmw
+    project: edj
+    env: dev
+
+#     tls: []

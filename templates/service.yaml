@@ -1,0 +1,18 @@
+{{- if not .Values.global.ingress.only -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-svc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "edj-vmw.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: {{ .Values.service.portName }}
+  selector:
+    {{- toYaml .Values.service.labels | nindent 4 }}
+{{- end }}

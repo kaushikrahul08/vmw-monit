@@ -1,0 +1,59 @@
+{{- if not .Values.global.ingress.only -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- if ne .Values.deploymentOptions.activeStrategy ( index .Values.global.deploymentOptions.strategies 0 ) }}
+  name: {{ .Release.Name }}-deployment-{{ .Values.deploymentOptions.activeChannel }}
+  {{- else }}
+  name: {{ .Release.Name }}-deployment
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{- include "edj-vmw.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.global.replicaCount }}
+  selector:
+    matchLabels:
+      {{- toYaml .Values.app.labels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.app.labels | nindent 8 }}
+        {{- if ne .Values.deploymentOptions.activeStrategy ( index .Values.global.deploymentOptions.strategies 0 ) }}
+        version: {{ .Values.deploymentOptions.activeChannel }}
+        {{- end }}
+    spec:
+    {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+      - name: {{ .Values.app.containers.name }}
+        image: "{{ .Values.global.image.repository }}/{{ .Values.app.containers.image }}:{{ .Values.app.containers.tag }}"
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: {{ .Values.app.containers.port }}
+            protocol: TCP
+        {{- with .Values.app.containers.env }}
+        env:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.global.resources | nindent 12 }}
+        envFrom:
+          - configMapRef:
+              name: {{ .Release.Name }}-agent-config
+      {{- with .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}
